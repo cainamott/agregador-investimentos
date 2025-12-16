@@ -1,7 +1,7 @@
 package motta.caina.agregadorinvestimentos.service;
 
-import motta.caina.agregadorinvestimentos.controller.CreateUserDto;
-import motta.caina.agregadorinvestimentos.controller.UpdateUserDto;
+import motta.caina.agregadorinvestimentos.controller.dto.CreateUserDto;
+import motta.caina.agregadorinvestimentos.controller.dto.UpdateUserDto;
 import motta.caina.agregadorinvestimentos.entity.User;
 import motta.caina.agregadorinvestimentos.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;

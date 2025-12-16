@@ -1,4 +1,4 @@
-package motta.caina.agregadorinvestimentos.controller;
+package motta.caina.agregadorinvestimentos.controller.dto;
 
 public record CreateUserDto(String username, String email, String password) {
 
