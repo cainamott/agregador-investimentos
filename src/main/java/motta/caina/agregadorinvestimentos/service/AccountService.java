@@ -1,5 +1,6 @@
 package motta.caina.agregadorinvestimentos.service;
 
+import motta.caina.agregadorinvestimentos.client.BrapiClient;
 import motta.caina.agregadorinvestimentos.controller.dto.AccountResponseDTO;
 import motta.caina.agregadorinvestimentos.controller.dto.AccountStockResponseDTO;
 import motta.caina.agregadorinvestimentos.controller.dto.AssociateAccountStockDTO;
@@ -8,6 +9,7 @@ import motta.caina.agregadorinvestimentos.entity.AccountStockId;
 import motta.caina.agregadorinvestimentos.repository.AccountRepository;
 import motta.caina.agregadorinvestimentos.repository.AccountStockRepository;
 import motta.caina.agregadorinvestimentos.repository.StockRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,16 +20,21 @@ import java.util.UUID;
 @Service
 public class AccountService {
 
+    @Value("#{environment.TOKEN}")
+    private String TOKEN;
+
     private AccountRepository accountRepository;
 
     private StockRepository stockRepository;
 
     private AccountStockRepository accountStockRepository;
 
-    public AccountService(AccountRepository accountRepository, StockRepository stockRepository) {
+    private BrapiClient brapiClient;
+
+    public AccountService(AccountRepository accountRepository, StockRepository stockRepository, BrapiClient brapiClient) {
         this.accountRepository = accountRepository;
         this.stockRepository = stockRepository;
-
+        this.brapiClient = brapiClient;
     }
 
     public void associateStock(String accountId, AssociateAccountStockDTO associateAccountStockDTO) {
@@ -59,7 +66,16 @@ public class AccountService {
 
         return account.getAccountStocks()
                 .stream()
-                .map(ac -> new AccountStockResponseDTO(ac.getStock().getStockId(), ac.getQuantity(), 0.0))
+                .map(ac -> new AccountStockResponseDTO(
+                        ac.getStock().getStockId(),
+                        ac.getQuantity(), getTotal(ac.getQuantity(), ac.getStock().getStockId())))
                 .toList();
+    }
+
+    private Double getTotal(Integer quantity, String stockId) {
+
+        var response = brapiClient.getQuote(TOKEN, stockId);
+        var price = response.results().getFirst().regularMarketPrice();
+        return quantity * price;
     }
 }
